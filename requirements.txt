@@ -1,0 +1,16 @@
+fastapi[all]
+uvicorn[standard]
+sqlalchemy
+asyncpg
+databases[postgresql]
+alembic
+python-decouple
+python-dotenv
+python-jose[cryptography]
+passlib[bcrypt]
+jinja2
+markupsafe
+sqladmin
+pytest
+pytest-asyncio
+httpx
