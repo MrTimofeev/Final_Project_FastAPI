@@ -21,6 +21,7 @@ class User(Base):
     
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)
     team  = relationship("Team", back_populates="members")
+    owned_team = relationship("Team", back_populates="creator")
     
     # Связи
     
@@ -28,6 +29,3 @@ class User(Base):
     created_task = relationship("Task", back_populates="creator", foreign_keys="[Task.creator_id]")
     evaluations =  relationship("Evaluations", back_populates="user")
     meeting_participants = relationship("MeetingParticipants", back_populates="user")
-
-
-    
