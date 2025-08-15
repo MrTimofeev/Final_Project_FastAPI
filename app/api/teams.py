@@ -7,7 +7,7 @@ from app.database.database import get_db
 from app.models.team import Team
 from app.models.user import User
 from app.schemas.team import TeamCreate, TeamOut
-from app.core.security import admin_required
+from app.core.security import admin_required, get_current_user
 
 router = APIRouter(prefix="/team", tags=["teams"])
 
@@ -41,3 +41,37 @@ async def create_team(
     await db.commit()
     await db.refresh(team)
     return team
+
+@router.post("/join", response_model=TeamOut)
+async def join_team_by_code(
+    team_code: str,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Присоединение пользователя к команде по коду.
+    Нельзя менять команду, если уже в составе.
+    """
+    
+    if current_user.team_id is not None:
+        raise HTTPException(
+            status_code=400,
+            detail="Вы уже состоите в команде"
+        )
+    
+    result = await db.execute(select(Team).where(Team.team_code == team_code))
+    team = result.scalars().first()
+    
+    if not team:
+        raise HTTPException(
+            status_code=404,
+            detail="Команда с таким кодом не найдена"
+        )
+        
+    current_user.team_id = team.id
+    db.add(current_user)
+    
+    await db.commit()
+    await db.refresh(current_user)
+    
+    return team 
