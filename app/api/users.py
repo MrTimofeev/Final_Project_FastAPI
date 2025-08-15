@@ -6,7 +6,7 @@ from typing import List
 from app.database.database import get_db
 from app.models.user import User
 from app.schemas.user import UserOut, UserCreate, UserUpdate
-# from app.utils.security import get_password_hash  # создадим чуть позже
+from app.utils.security import get_password_hash
 
 router = APIRouter()
 

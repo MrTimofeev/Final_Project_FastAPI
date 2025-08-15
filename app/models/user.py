@@ -17,6 +17,7 @@ class User(Base):
     hased_password = Column(String, nullable=False)
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
+    is_superuser = Column(Boolean, default=True)
     role = Column(SQLEnum(RoleEnum), default=RoleEnum.user)
     
     team_id = Column(Integer, ForeignKey("teams.id"), nullable=True)

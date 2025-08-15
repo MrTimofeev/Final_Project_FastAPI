@@ -52,7 +52,7 @@ def read_root():
     }
 
 # Подключаем роуты (авторизация, пользователи и т.д.)
-app.include_router(auth.router, prefix="/auth", tags=["auth"])
+app.include_router(auth.router, prefix="", tags=["auth"]) 
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(teams.router, prefix="/teams", tags=["teams"])
 app.include_router(tasks.router, prefix="/tasks", tags=["tasks"])

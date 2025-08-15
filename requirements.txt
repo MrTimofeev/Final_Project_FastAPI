@@ -13,4 +13,4 @@ markupsafe
 sqladmin
 pytest
 pytest-asyncio
-httpx
+fastapi-users[sqlalchemy,jwt]

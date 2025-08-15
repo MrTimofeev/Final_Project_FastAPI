@@ -7,7 +7,7 @@ from datetime import datetime
 class UserCreate(BaseModel):
     email: EmailStr
     password: str = Field(..., min_length=6)
-    full_name = Optional[str] = None # type: ignore
+    full_name: Optional[str] = None 
     role: Optional[str] = "user"
     
 
@@ -18,6 +18,7 @@ class UserOut(BaseModel):
     full_name: Optional[str] = None
     role: str
     is_active: bool
+    is_superuser: bool
     team_id: Optional[str]
     
     class Config:
@@ -28,6 +29,9 @@ class UserOut(BaseModel):
 class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     password: Optional[str] = None # если передан - обновляем хеш
+    role: Optional[str] = None
+    is_active: Optional[bool] = None
+    is_superuser: Optional[bool] = None
     
 
 
