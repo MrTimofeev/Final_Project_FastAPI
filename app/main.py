@@ -6,7 +6,7 @@ from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
 from app.database.database import Base, engine
-from app.api import auth, users, teams, tasks, meetings, evaluations
+from app.api import auth, users, teams, tasks, meetings, evaluations, calendar
 from app.models.user import User
 
 
@@ -58,3 +58,4 @@ app.include_router(teams.router, prefix="/teams", tags=["teams"])
 app.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 app.include_router(meetings.router, prefix="/meetings", tags=["meetings"])
 app.include_router(evaluations.router, prefix="/evaluations", tags=["evaluations"])
+app.include_router(calendar.router, prefix="/cakendar", tags=["calendar"])
