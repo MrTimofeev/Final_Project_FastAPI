@@ -1,3 +1,4 @@
+from app.admin import setup_admin
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -48,14 +49,19 @@ def read_root():
         "message": "Добро пожаловать в систему",
         "docs": "/docs",
         "admin": "/admin",
-        "login": "/login"
+        "login": "/auth/jwt/login"
     }
 
+
 # Подключаем роуты (авторизация, пользователи и т.д.)
-app.include_router(auth.router, prefix="", tags=["auth"]) 
+app.include_router(auth.router, prefix="", tags=["auth"])
 app.include_router(users.router, prefix="/users", tags=["users"])
 app.include_router(teams.router, prefix="/teams", tags=["teams"])
 app.include_router(tasks.router, prefix="/tasks", tags=["tasks"])
 app.include_router(meetings.router, prefix="/meetings", tags=["meetings"])
-app.include_router(evaluations.router, prefix="/evaluations", tags=["evaluations"])
+app.include_router(evaluations.router,
+                   prefix="/evaluations", tags=["evaluations"])
 app.include_router(calendar.router, prefix="/cakendar", tags=["calendar"])
+
+
+setup_admin(app)
