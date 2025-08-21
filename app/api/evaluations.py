@@ -7,7 +7,7 @@ from app.database.database import get_db
 from app.models.user import User
 from app.models.task import Task
 from app.models.evaluation import Evaluation
-from app.schemas.evaluation import EvalustionCreate, EvaluationOut
+from app.schemas.evaluation import EvaluationCreate, EvaluationOut
 from app.core.security import manager_required, get_current_user
 
 router = APIRouter(prefix="/evaluations", tags=["evaluations"])
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 
 @router.post("/", response_model=EvaluationOut, status_code=status.HTTP_201_CREATED)
 async def create_evaluation(
-    evaluation_data: EvalustionCreate,
+    evaluation_data: EvaluationCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(manager_required)
 ):
@@ -36,12 +36,12 @@ async def create_evaluation(
             Task.team_id == current_user.team_id
         )
     )
-    task = result.scalar().first()
+    task = result.scalars().first()
     if not task:
         raise HTTPException(
             status_code=404, detail="Задача не найдена или вы не в команде")
 
-    if task.status != "done":
+    if task.status.value != "done":
         raise HTTPException(
             status_code=400, detail="Оценивать можно только выполненые задачи")
 

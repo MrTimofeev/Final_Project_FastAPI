@@ -28,7 +28,7 @@ async def created_task(
             detail="Вы не состоите в команде"
         )
         
-    # Если назначаем - проверяем, что исполнитель в той же команде
+    # Проверка исполнителя (если указан)
     if task_data.assignee_id:
         result = await db.execute(
             select(User)
@@ -41,17 +41,16 @@ async def created_task(
                 detail="Исполнитель не найден или не в вашей команде"
             )
         
-        task = Task(
-            **task_data.dict(exclude_unset=True),
-            creator_id=current_user.id,
-            team_id=current_user.team_id,
-            status=TaskStatus.open
-        )
-        
-        db.add(task)
-        await db.commit()
-        await db.refresh(task)
-        return task
+    task = Task(
+        **task_data.model_dump(exclude_unset=True),
+        creator_id=current_user.id,
+        team_id=current_user.team_id,
+        status=TaskStatus.open
+    )
+    db.add(task)
+    await db.commit()
+    await db.refresh(task)
+    return task
     
 @router.get('/', response_model=list[TaskOut])
 async def get_tasks(

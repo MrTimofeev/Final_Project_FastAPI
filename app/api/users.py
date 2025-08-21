@@ -5,15 +5,15 @@ from typing import List
 
 from app.database.database import get_db
 from app.models.user import User
-from app.schemas.user import UserOut, UserCreate, UserUpdate
+from app.schemas.user import UserRead, UserCreate, UserUpdate
 from app.utils.security import get_password_hash
 
-router = APIRouter()
+router = APIRouter(prefix="/users", tags=["users"])
 
 
-@router.post("/", response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
 async def created_user(
-    user: UserCreate, 
+    user: UserCreate,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -43,7 +43,7 @@ async def created_user(
     return db_user
 
 
-@router.get("/", response_model=List[UserOut])
+@router.get("/", response_model=List[UserRead])
 async def get_users(
     skip: int = 0,
     limit: int = 100,
@@ -57,7 +57,7 @@ async def get_users(
     return users
 
 
-@router.get('/{user_id}', response_model=UserOut)
+@router.get('/{user_id}', response_model=UserRead)
 async def get_user(
     user_id: int,
     db: AsyncSession = Depends(get_db)
@@ -74,7 +74,7 @@ async def get_user(
     return user
 
 
-@router.patch("/{user_id}", response_model=UserOut)
+@router.patch("/{user_id}", response_model=UserRead)
 async def update_user(
     user_id: int,
     user_update: UserUpdate,
@@ -94,7 +94,7 @@ async def update_user(
     if user_update.full_name is not None:
         user.full_name = user_update.full_name
     if user_update.password is not None:
-        user.hased_password = get_password_hash(user_update.password)
+        user.hashed_password = get_password_hash(user_update.password)
 
     await db.commit()
     await db.refresh(user)
@@ -110,14 +110,12 @@ async def delete_user(
     Удалить пользователя.
     Только сам пользователь или admin может удалить.
     """
-    
+
     result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalars().first()
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
-    
+
     await db.delete(user)
     await db.commit
     return
-
-

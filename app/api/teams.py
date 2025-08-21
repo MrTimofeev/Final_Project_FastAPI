@@ -67,11 +67,13 @@ async def join_team_by_code(
             status_code=404,
             detail="Команда с таким кодом не найдена"
         )
-        
-    current_user.team_id = team.id
-    db.add(current_user)
+    result = await db.execute(select(User).where(User.id == current_user.id))
+    user = result.scalar_one()
+    
+    user.team_id = team.id
+    db.add(user)
     
     await db.commit()
-    await db.refresh(current_user)
+    await db.refresh(user)
     
     return team 
