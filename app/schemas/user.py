@@ -1,38 +1,52 @@
-from pydantic import BaseModel, EmailStr, Field
+# app/schemas/user.py
+from pydantic import EmailStr, Field, ConfigDict
 from typing import Optional
 from datetime import datetime
+from fastapi_users import schemas
+from enum import Enum
 
 
-# Схема для создание пользователя (регистарции)
-class UserCreate(BaseModel):
-    email: EmailStr
-    password: str = Field(..., min_length=6)
-    full_name: Optional[str] = None 
-    role: Optional[str] = "user"
-    
+class RoleEnum(str, Enum):
+    user = "user"
+    manager = "manager"
+    admin = "admin"
 
-# Схема дотя ответа (без пароля!)
-class UserOut(BaseModel):
+
+class UserRead(schemas.BaseUser[int]):
     id: int
     email: EmailStr
     full_name: Optional[str] = None
-    role: str
-    is_active: bool
-    is_superuser: bool
-    team_id: Optional[str]
-    
-    class Config:
-        from_attributes = True
-        
-        
-# Схема обновление профиля
-class UserUpdate(BaseModel):
+    role: RoleEnum = RoleEnum.user
+    is_active: bool = True
+    is_superuser: bool = False
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class UserCreate(schemas.BaseUserCreate):
+    email: EmailStr
+    password: str = Field(..., min_length=6)
     full_name: Optional[str] = None
-    password: Optional[str] = None # если передан - обновляем хеш
-    role: Optional[str] = None
-    is_active: Optional[bool] = None
-    is_superuser: Optional[bool] = None
+
+    is_active: bool = True
+    is_superuser: bool = False
+    is_verified: bool = False
     
+    model_config = ConfigDict(
+        from_attributes=True, 
+        json_schema_extra= {
+            "examples": [
+                {
+                    "email": "user@example.com",
+                    "password": "password123",
+                    "full_name": "John Doe"
+                }
+            ]
+        }
+    )
 
 
-    
+class UserUpdate(schemas.BaseUserUpdate):
+    full_name: Optional[str] = None
+    password: Optional[str] = None
+    role: Optional[RoleEnum] = None

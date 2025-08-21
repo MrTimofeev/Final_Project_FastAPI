@@ -1,20 +1,18 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 from datetime import datetime
 
-class EvalustionCreate(BaseModel):
+
+class EvaluationCreate(BaseModel):
     task_id: int
-    score: int # от 1 до 5 
-    
+    score: int = Field(ge=1, le=5)
+
+
 class EvaluationOut(BaseModel):
     id: int
     task_id: int
-    user_id: int # Кто оценил (менеджер)
+    user_id: int  # Кто оценил (менеджер)
     score: int
     evaluated_at: datetime
-    
-    class Config:
-        from_attributes = True
-        
-        
-    
+
+    model_config = ConfigDict(from_attributes=True)
