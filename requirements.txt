@@ -13,4 +13,7 @@ markupsafe
 sqladmin
 pytest
 pytest-asyncio
+pytest-mock
 fastapi-users[sqlalchemy,jwt]
+httpx
+aiosqlite
