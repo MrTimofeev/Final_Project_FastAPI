@@ -1,6 +1,5 @@
 from sqladmin import Admin, ModelView
 from fastapi import FastAPI
-
 from app.database.database import engine
 from app.models.user import User
 from app.models.team import Team
@@ -9,6 +8,7 @@ from app.models.meeting import Meeting
 from app.models.evaluation import Evaluation
 
 
+# Админ-панель
 class UserAdmin(ModelView, model=User):
     column_list = ["id", "email", "full_name", "role", "is_active", "team"]
     column_searchable_list = ["email", "full_name"]
@@ -18,7 +18,7 @@ class UserAdmin(ModelView, model=User):
     can_delete = True
     name = "Пользователь"
     name_plural = "Пользователи"
-    icon = "fa-dolid fa_user"
+    icon = "fa-solid fa-user"
 
 
 class TeamAdmin(ModelView, model=Team):
@@ -27,14 +27,13 @@ class TeamAdmin(ModelView, model=Team):
     can_create = True
     can_edit = True
     can_delete = True
-    name = "Комада"
-    name_plural = "Комады"
+    name = "Команда"
+    name_plural = "Команды"
     icon = "fa-solid fa-users"
 
 
 class TaskAdmin(ModelView, model=Task):
-    column_list = ["id", "title", "status",
-                   "creator", "assigne", "team", "deadline"]
+    column_list = ["id", "title", "status", "creator", "assignee", "team", "deadline"]
     column_sortable_list = ["status", "deadline", "created_at"]
     can_create = True
     can_edit = True
@@ -45,33 +44,33 @@ class TaskAdmin(ModelView, model=Task):
 
 
 class MeetingAdmin(ModelView, model=Meeting):
-    column_list = ["id", "titile", "start_time", "end_time", "team"]
+    column_list = ["id", "title", "start_time", "end_time", "team"]
     column_sortable_list = ["start_time", "end_time"]
     can_create = True
     can_edit = True
     can_delete = True
     name = "Встреча"
     name_plural = "Встречи"
-    icon = "fa-solid da-calendar-day"
+    icon = "fa-solid fa-calendar-day"
 
 
 class EvaluationAdmin(ModelView, model=Evaluation):
-    column_list = ["id", "task", "user", "score", "evaluation_at"]
-    column_sortable_list = ["score", "evaluation_at"]
+    column_list = ["id", "task", "user", "score", "evaluated_at"]
+    column_sortable_list = ["score", "evaluated_at"]
     can_create = True
     can_edit = True
     can_delete = True
     name = "Оценка"
-    name_plural = "Оценки" 
+    name_plural = "Оценки"
     icon = "fa-solid fa-star"
-    
-# Функции для подлючения админки к FastAPI
+
+
+# Функция для подключения админки к FastAPI
 def setup_admin(app: FastAPI):
     admin = Admin(app, engine)
-    
+
     admin.add_view(UserAdmin)
     admin.add_view(TeamAdmin)
     admin.add_view(TaskAdmin)
     admin.add_view(MeetingAdmin)
     admin.add_view(EvaluationAdmin)
-    
