@@ -41,8 +41,6 @@ async def test_create_task_by_manager(client: AsyncClient, manager_user, db_sess
         }
     )
     
-    print("Status:", response.status_code)
-    print("Response:", response.text)
     assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Новая задача"

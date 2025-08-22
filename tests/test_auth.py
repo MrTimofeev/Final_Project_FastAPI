@@ -26,7 +26,6 @@ async def test_login_user(client: AsyncClient, registered_user):
             "password": "password123"
         }
     )
-    print(f"ОТВЕТ СЕРВЕРА: {response.text}")
     assert response.status_code == 200
     data = response.json()
     

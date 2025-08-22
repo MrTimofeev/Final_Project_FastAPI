@@ -29,7 +29,6 @@ async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
     
-    # Используем общий TestingSessionLocal, привязанный к engine
     session = TestingSessionLocal()
     try:
         yield session
@@ -41,11 +40,9 @@ async def db_session():
         
 @pytest_asyncio.fixture(scope="function", autouse=True)
 def override_dependency(db_session):
-    print("🔧 Оверрайд зависимостей: get_db -> db_session")
     
-    # Мы будем подменять get_db на генератор, который возвращает db_session
     def override_get_db():
-        yield db_session  # Это важно — yield!
+        yield db_session  
 
     fastapi_app.dependency_overrides[get_db] = override_get_db
     yield
@@ -54,7 +51,6 @@ def override_dependency(db_session):
         
 @pytest_asyncio.fixture
 async def client():
-    print("🔧 Создаём ASGI-клиент с transport...")
     fastapi_app.state.TESTING = True
     transport = ASGITransport(app=fastapi_app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:

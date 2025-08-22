@@ -47,8 +47,6 @@ async def test_join_team_by_code(client: AsyncClient, regular_user, db_session):
     
     response = await client.post("/team/join?team_code=abcd1234")
     
-    print("Status:", response.status_code)
-    print("Response:", response.text)
     assert response.status_code == 200
     assert response.json()["team_code"] == "abcd1234"
 

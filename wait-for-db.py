@@ -9,10 +9,10 @@ async def wait_for_db():
     while True:
         try:
             async with engine.connect() as conn:
-                print("✅ База данных готова!")
+                print("База данных готова!")
                 return
         except Exception as e:
-            print("❌ Ожидание базы данных... (ошибка подключения)")
+            print("Ожидание базы данных... (ошибка подключения)")
             time.sleep(2)
 
 if __name__ == "__main__":

@@ -38,7 +38,6 @@ async def test_create_evaluation_by_manager(
     await db_session.commit()
     await db_session.refresh(task)
     
-    print(f"СТАТУС ЗАДАЧИ:{task.id, task.status}")
     # Логин
     login = await client.post(
         "/auth/jwt/login",
@@ -62,8 +61,6 @@ async def test_create_evaluation_by_manager(
             "Content-Type": "application/json"
         }
     )
-    print("Status:", response.status_code)
-    print("Response:", response.text)
     
     assert response.status_code == 201
     assert response.json()["score"] == 5

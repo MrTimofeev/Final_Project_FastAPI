@@ -45,8 +45,6 @@ class UserManager(BaseUserManager[User, int]):
         request: Optional[Request] = None,
         response: Optional[dict] = None,
     ):
-        print(f"🔐 [Login] SECRET при логине: {SECRET[:10]}...")
-        print(f"✅ Пользователь {user.id} вошёл в систему.")
         print(f"Пользователь {user.id} вошёл в систему.")
 
     async def on_after_forgot_password(
@@ -68,12 +66,9 @@ bearer_transport = BearerTransport(tokenUrl="/auth/jwt/login")
 
 # Стратегия аутентификации — JWT
 def get_jwt_strategy() -> JWTStrategy:
-    print("🔐 [DEBUG] Создаётся JWTStrategy с секретом:", SECRET[:10] + "...")
     strategy = JWTStrategy(secret=SECRET, lifetime_seconds=ACCESS_TOKEN_EXPIRE_MINUTES * 60)
-    print(f"🔐 [DEBUG] Стратегия создана: {strategy}")
     return strategy
 
-print("🔧 [DEBUG] Регистрируем auth_backend с get_strategy:", get_jwt_strategy)
 
 # Аутентификационный бэкенд
 auth_backend = AuthenticationBackend(

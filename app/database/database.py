@@ -8,13 +8,11 @@ def str_to_bool(value: str) -> bool:
 # Определяем режим тестирования
 TESTING = str_to_bool(config("TESTING", default="false"))
 
-print(TESTING)
 if TESTING:
     DATABASE_URL = config("DATABASE_TEST_URL")
 else:
     DATABASE_URL = config("DATABASE_URL")
 
-print(DATABASE_URL)
 
 engine = create_async_engine(DATABASE_URL, echo=False)
 
