@@ -3,7 +3,6 @@ from __future__ import with_statement
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from sqlalchemy.ext.asyncio import AsyncEngine
-from logging import getLogger
 from alembic import context
 
 import os

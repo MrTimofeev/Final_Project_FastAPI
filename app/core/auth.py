@@ -10,7 +10,6 @@ from fastapi_users.manager import BaseUserManager
 from fastapi_users.exceptions import InvalidID
 from decouple import config
 from typing import AsyncGenerator, Optional
-from uuid import UUID
 
 from app.models.user import User
 from app.database.database import AsyncSessionLocal

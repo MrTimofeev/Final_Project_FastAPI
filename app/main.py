@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
-from app.database.database import engine, Base
+from app.database.database import engine
 from app.api import auth, users, teams, tasks, meetings, evaluations, calendar, frontend
 
 

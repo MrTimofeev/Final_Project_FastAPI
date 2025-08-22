@@ -1,6 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import select
-from typing import Callable, Any
+from typing import Callable
 
 from app.core.auth import current_active_user
 from app.models.user import User, RoleEnum

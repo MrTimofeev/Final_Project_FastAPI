@@ -1,9 +1,8 @@
-from fastapi import APIRouter, Request, Depends, Form, HTTPException, status
+from fastapi import APIRouter, Request, Depends, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
 from app.core.auth import current_active_user
-from app.core.security import get_current_user
 from app.models.user import User
 
 router = APIRouter(tags=["frontend"])
