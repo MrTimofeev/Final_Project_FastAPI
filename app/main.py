@@ -1,3 +1,4 @@
+from app.admin import setup_admin
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -60,6 +61,5 @@ app.include_router(meetings.router)
 app.include_router(evaluations.router)
 app.include_router(calendar.router)
 
-from app.admin import setup_admin
 
 setup_admin(app)
