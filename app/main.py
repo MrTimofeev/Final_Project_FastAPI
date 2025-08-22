@@ -22,7 +22,7 @@ app = FastAPI(
     title="Итоговый проект, система управление командами",
     description="Упрощенная система упаравления командами, задачами, оценками и встречами",
     version="0.0.1",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Разрешаем CORS (на всякий случай, если будет фронтенд)
@@ -48,8 +48,8 @@ templates = Jinja2Templates(directory="app/templates")
 #         "admin": "/admin",
 #         "login": "/auth/jwt/login"
 #     }
-    
-    
+
+
 # Подключаем роуты (авторизация, пользователи и т.д.)
 app.include_router(auth.router)
 app.include_router(frontend.router)
@@ -61,4 +61,5 @@ app.include_router(evaluations.router)
 app.include_router(calendar.router)
 
 from app.admin import setup_admin
+
 setup_admin(app)

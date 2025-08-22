@@ -31,18 +31,18 @@ class UserCreate(schemas.BaseUserCreate):
     is_active: bool = True
     is_superuser: bool = False
     is_verified: bool = False
-    
+
     model_config = ConfigDict(
-        from_attributes=True, 
-        json_schema_extra= {
+        from_attributes=True,
+        json_schema_extra={
             "examples": [
                 {
                     "email": "user@example.com",
                     "password": "password123",
-                    "full_name": "John Doe"
+                    "full_name": "John Doe",
                 }
             ]
-        }
+        },
     )
 
 

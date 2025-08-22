@@ -26,7 +26,5 @@ class MeetingOut(BaseModel):
     start_time: datetime
     end_time: datetime
     team_id: int
-    
+
     model_config = ConfigDict(from_attributes=True)
-        
-        

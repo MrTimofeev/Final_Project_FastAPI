@@ -7,11 +7,8 @@ from datetime import datetime
 async def test_create_task_by_manager(client: AsyncClient, manager_user, db_session):
     # Добавим менеджера в команду
     from app.models.team import Team
-    team = Team(
-        name="Dev Team",
-        team_code="dev123",
-        creator_id=manager_user.id
-    )
+
+    team = Team(name="Dev Team", team_code="dev123", creator_id=manager_user.id)
     db_session.add(team)
     await db_session.commit()
     await db_session.refresh(team)
@@ -23,10 +20,7 @@ async def test_create_task_by_manager(client: AsyncClient, manager_user, db_sess
     # Логин
     login = await client.post(
         "/auth/jwt/login",
-        data={
-            "username": "manager@example.com",
-            "password": "password123"
-        }
+        data={"username": "manager@example.com", "password": "password123"},
     )
 
     token = login.json()["access_token"]
@@ -37,10 +31,10 @@ async def test_create_task_by_manager(client: AsyncClient, manager_user, db_sess
         json={
             "title": "Новая задача",
             "description": "Сделать MVP",
-            "deadline": "2025-04-10T10:00:00"
-        }
+            "deadline": "2025-04-10T10:00:00",
+        },
     )
-    
+
     assert response.status_code == 201
     data = response.json()
     assert data["title"] == "Новая задача"

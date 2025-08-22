@@ -12,10 +12,7 @@ router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/", response_model=UserRead, status_code=status.HTTP_201_CREATED)
-async def created_user(
-    user: UserCreate,
-    db: AsyncSession = Depends(get_db)
-):
+async def created_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     """
     Создание пользователя
     """
@@ -24,8 +21,7 @@ async def created_user(
     result = await db.execute(select(User).where(User.email == user.email))
     if result.scalar().first():
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email уже зарегестрирован"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Email уже зарегестрирован"
         )
 
     hashed_password = get_password_hash(user.password)
@@ -34,7 +30,7 @@ async def created_user(
         hashed_password=hashed_password,
         full_name=user.full_name,
         role=user.role,
-        is_active=True
+        is_active=True,
     )
 
     db.add(db_user)
@@ -45,9 +41,7 @@ async def created_user(
 
 @router.get("/", response_model=List[UserRead])
 async def get_users(
-    skip: int = 0,
-    limit: int = 100,
-    db: AsyncSession = Depends(get_db)
+    skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)
 ):
     """
     Получение списка пользователей с пагинацией
@@ -57,11 +51,8 @@ async def get_users(
     return users
 
 
-@router.get('/{user_id}', response_model=UserRead)
-async def get_user(
-    user_id: int,
-    db: AsyncSession = Depends(get_db)
-):
+@router.get("/{user_id}", response_model=UserRead)
+async def get_user(user_id: int, db: AsyncSession = Depends(get_db)):
     """
     Получить пользователя по id
     """
@@ -76,9 +67,7 @@ async def get_user(
 
 @router.patch("/{user_id}", response_model=UserRead)
 async def update_user(
-    user_id: int,
-    user_update: UserUpdate,
-    db: AsyncSession = Depends(get_db)
+    user_id: int, user_update: UserUpdate, db: AsyncSession = Depends(get_db)
 ):
     """
     Обновить профиль пользователя.
@@ -102,10 +91,7 @@ async def update_user(
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def delete_user(
-    user_id: int,
-    db: AsyncSession = Depends(get_db)
-):
+async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
     """
     Удалить пользователя.
     Только сам пользователь или admin может удалить.

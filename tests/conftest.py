@@ -1,5 +1,5 @@
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport 
+from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -16,7 +16,7 @@ from app.models.meeting import Meeting
 
 from app.utils.security import get_password_hash
 
-# тестовая база в памяти 
+# тестовая база в памяти
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
 
 TestingSessionLocal = sessionmaker(
@@ -28,7 +28,7 @@ TestingSessionLocal = sessionmaker(
 async def db_session():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    
+
     session = TestingSessionLocal()
     try:
         yield session
@@ -36,26 +36,27 @@ async def db_session():
         await session.close()
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.drop_all)
-    
-        
+
+
 @pytest_asyncio.fixture(scope="function", autouse=True)
 def override_dependency(db_session):
-    
+
     def override_get_db():
-        yield db_session  
+        yield db_session
 
     fastapi_app.dependency_overrides[get_db] = override_get_db
     yield
     fastapi_app.dependency_overrides.clear()
-    
-        
+
+
 @pytest_asyncio.fixture
 async def client():
     fastapi_app.state.TESTING = True
     transport = ASGITransport(app=fastapi_app)
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         yield ac
-        
+
+
 @pytest_asyncio.fixture
 async def admin_user(db_session: AsyncSession):
     user = User(
@@ -64,13 +65,14 @@ async def admin_user(db_session: AsyncSession):
         full_name="Admin",
         role="admin",
         is_active=True,
-        is_superuser=False
+        is_superuser=False,
     )
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
-    
+
     return user
+
 
 @pytest_asyncio.fixture
 async def manager_user(db_session: AsyncSession):
@@ -80,13 +82,14 @@ async def manager_user(db_session: AsyncSession):
         full_name="Manager",
         role="manager",
         is_active=True,
-        team_id=None
+        team_id=None,
     )
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
-    
+
     return user
+
 
 @pytest_asyncio.fixture
 async def regular_user(db_session: AsyncSession):
@@ -96,12 +99,12 @@ async def regular_user(db_session: AsyncSession):
         full_name="User",
         role="user",
         is_active=True,
-        team_id = None
+        team_id=None,
     )
     db_session.add(user)
     await db_session.commit()
     await db_session.refresh(user)
-    
+
     return user
 
 
@@ -114,8 +117,7 @@ async def registered_user(client: AsyncClient):
             "email": "newuser@example.com",
             "password": "password123",
             "full_name": "New user",
-        }
+        },
     )
     assert response.status_code == 201
     return response.json()
-

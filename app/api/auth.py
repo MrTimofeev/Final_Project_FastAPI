@@ -17,16 +17,13 @@ router.include_router(
     fastapi_users.get_register_router(
         user_schema=UserRead,
         user_create_schema=UserCreate,
-        ),
+    ),
     tags=["auth"],
 )
 
 # Роутер управления пользователем: /auth/users/me, /auth/users/{id}
 router.include_router(
-    fastapi_users.get_users_router(
-        user_schema=UserRead,
-        user_update_schema=UserUpdate
-    ),
+    fastapi_users.get_users_router(user_schema=UserRead, user_update_schema=UserUpdate),
     prefix="/users",
     tags=["users"],
 )

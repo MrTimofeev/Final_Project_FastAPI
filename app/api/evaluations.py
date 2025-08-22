@@ -17,7 +17,7 @@ router = APIRouter(prefix="/evaluations", tags=["evaluations"])
 async def create_evaluation(
     evaluation_data: EvaluationCreate,
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(manager_required)
+    current_user: User = Depends(manager_required),
 ):
     """
     Только manager можеь оценить задачу.
@@ -26,24 +26,24 @@ async def create_evaluation(
     """
     # Провека: оценка 1 до 5
     if not (1 <= evaluation_data.score <= 5):
-        raise HTTPException(
-            status_code=400, detail="Оценка должны быть от 1 до 5")
+        raise HTTPException(status_code=400, detail="Оценка должны быть от 1 до 5")
 
     # Проверка: задача существует и в команде пользователя
     result = await db.execute(
         select(Task).where(
-            Task.id == evaluation_data.task_id,
-            Task.team_id == current_user.team_id
+            Task.id == evaluation_data.task_id, Task.team_id == current_user.team_id
         )
     )
     task = result.scalars().first()
     if not task:
         raise HTTPException(
-            status_code=404, detail="Задача не найдена или вы не в команде")
+            status_code=404, detail="Задача не найдена или вы не в команде"
+        )
 
     if task.status.value != "done":
         raise HTTPException(
-            status_code=400, detail="Оценивать можно только выполненые задачи")
+            status_code=400, detail="Оценивать можно только выполненые задачи"
+        )
 
     # Проверка: уже оценена?
     result = await db.execute(
@@ -56,7 +56,7 @@ async def create_evaluation(
     evaluation = Evaluation(
         task_id=evaluation_data.task_id,
         user_id=current_user.id,
-        score=evaluation_data.score
+        score=evaluation_data.score,
     )
 
     db.add(evaluation)
@@ -67,17 +67,14 @@ async def create_evaluation(
 
 @router.get("/my", response_model=list[EvaluationOut])
 async def get_my_evaluations(
-    db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    db: AsyncSession = Depends(get_db), current_user: User = Depends(get_current_user)
 ):
     """
     Пользователь видит все свои оцененные задачи.
     """
 
     result = await db.execute(
-        select(Evaluation)
-        .join(Task)
-        .where(Task.assignee_id == current_user.id)
+        select(Evaluation).join(Task).where(Task.assignee_id == current_user.id)
     )
     evaluations = result.scalar().all()
     return evaluations
@@ -85,33 +82,30 @@ async def get_my_evaluations(
 
 @router.get("/average")
 async def get_average_score(
-    period: str = "week", # week, month
+    period: str = "week",  # week, month
     db: AsyncSession = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user),
 ):
     """
     Средняя оценка за период.
     """
-    
+
     now = datetime.utcnow()
     if period == "week":
         start_date = now - timedelta(days=7)
     elif period == "month":
         start_date = now - timedelta(days=30)
     else:
-        raise HTTPException(status_code=400, detail="period должен быть 'week' или 'monrh'")
-    
+        raise HTTPException(
+            status_code=400, detail="period должен быть 'week' или 'monrh'"
+        )
+
     result = await db.execute(
         select(func.avg(Evaluation.score))
         .join(Task)
         .where(
-            Task.assignee_id == current_user.id,
-            Evaluation.evaluated_at >= start_date
+            Task.assignee_id == current_user.id, Evaluation.evaluated_at >= start_date
         )
     )
     avg = result.scalar()
-    return {
-        "average_score": round(avg, 2) if avg else 0.0
-    }
-    
-    
+    return {"average_score": round(avg, 2) if avg else 0.0}
