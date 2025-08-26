@@ -12,6 +12,7 @@ jinja2
 markupsafe
 sqladmin
 pytest
+pytest-cov
 pytest-asyncio
 pytest-mock
 fastapi-users[sqlalchemy,jwt]
