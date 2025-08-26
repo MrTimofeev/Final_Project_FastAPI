@@ -51,5 +51,5 @@
 
 ```bash
 python -m pytest -v
-pytest --cov=app --cov-report=html
+python -m pytest --cov=app --cov-report=term
 ```
