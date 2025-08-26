@@ -50,6 +50,6 @@
 Прежде чем запускать тесты измени в файле `.env` параметр TESTING на True.
 
 ```bash
-pytest -v
+python -m pytest -v
 pytest --cov=app --cov-report=html
 ```
