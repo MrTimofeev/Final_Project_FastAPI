@@ -4,7 +4,17 @@ from fastapi.templating import Jinja2Templates
 
 from app.core.auth import current_active_user
 from app.models.user import User
-from app.api.frontend import login, register, evaluation, meeting, task, team, calendar, user, logout
+from app.api.frontend import (
+    login,
+    register,
+    evaluation,
+    meeting,
+    task,
+    team,
+    calendar,
+    user,
+    logout,
+)
 
 router = APIRouter(tags=["frontend"])
 

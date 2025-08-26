@@ -21,8 +21,7 @@ async def tasks_page(request: Request, user: User = Depends(current_active_user)
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
-                "http://localhost:8000/tasks/",
-                cookies=request.cookies
+                "http://localhost:8000/tasks/", cookies=request.cookies
             )
             if response.status_code == 200:
                 tasks = response.json()
@@ -35,21 +34,17 @@ async def tasks_page(request: Request, user: User = Depends(current_active_user)
             tasks = []
             request.session["messages"] = ["Сервер задач недоступен."]
 
-    return templates.TemplateResponse("tasks/list.html", {
-        "request": request,
-        "user": user,
-        "tasks": tasks
-    })
+    return templates.TemplateResponse(
+        "tasks/list.html", {"request": request, "user": user, "tasks": tasks}
+    )
 
 
 @router.get("/view/tasks/create", response_class=HTMLResponse)
-async def create_task_page(
-    request: Request,
-    user: User = Depends(current_active_user)
-):
+async def create_task_page(request: Request, user: User = Depends(current_active_user)):
     if user.role not in [RoleEnum.manager, RoleEnum.admin]:
         request.session["messages"] = [
-            "Только менеджеры и администраторы могут создавать задачи."]
+            "Только менеджеры и администраторы могут создавать задачи."
+        ]
         return RedirectResponse("/view/tasks", status_code=303)
 
     if not user.team_id:
@@ -62,7 +57,7 @@ async def create_task_page(
             response = await client.get(
                 f"http://localhost:8000/users/",
                 params={"skip": 0, "limit": 100},
-                cookies=request.cookies
+                cookies=request.cookies,
             )
             if response.status_code == 200:
                 all_users = response.json()
@@ -71,11 +66,10 @@ async def create_task_page(
         except Exception:
             request.session["messages"] = ["Не удалось загрузить участников команды."]
 
-    return templates.TemplateResponse("tasks/create.html", {
-        "request": request,
-        "user": user,
-        "team_members": team_members
-    })
+    return templates.TemplateResponse(
+        "tasks/create.html",
+        {"request": request, "user": user, "team_members": team_members},
+    )
 
 
 @router.post("/view/tasks/create", response_class=RedirectResponse)
@@ -85,7 +79,7 @@ async def create_task_form(
     description: str = Form(None),
     deadline: date = Form(None),
     assignee_id: int = Form(None),
-    user: User = Depends(current_active_user)
+    user: User = Depends(current_active_user),
 ):
     if user.role not in [RoleEnum.manager, RoleEnum.admin]:
         raise HTTPException(status_code=403, detail="Доступ запрещён")
@@ -98,15 +92,13 @@ async def create_task_form(
         "title": title,
         "description": description,
         "deadline": deadline.isoformat() if deadline else None,
-        "assignee_id": assignee_id
+        "assignee_id": assignee_id,
     }
 
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
-                "http://localhost:8000/tasks/",
-                json=task_data,
-                cookies=request.cookies
+                "http://localhost:8000/tasks/", json=task_data, cookies=request.cookies
             )
             if response.status_code == 201:
                 request.session["messages"] = ["Задача успешно создана!"]
@@ -122,15 +114,12 @@ async def create_task_form(
 
 @router.get("/view/tasks/{task_id}", response_class=HTMLResponse)
 async def task_detail_page(
-    request: Request,
-    task_id: int,
-    user: User = Depends(current_active_user)
+    request: Request, task_id: int, user: User = Depends(current_active_user)
 ):
     async with httpx.AsyncClient() as client:
         try:
             task_response = await client.get(
-                f"http://localhost:8000/tasks/{task_id}",
-                cookies=request.cookies
+                f"http://localhost:8000/tasks/{task_id}", cookies=request.cookies
             )
             if task_response.status_code != 200:
                 request.session["messages"] = ["Задача не найдена."]
@@ -139,7 +128,8 @@ async def task_detail_page(
 
             if isinstance(task["created_at"], str):
                 task["created_at"] = datetime.fromisoformat(
-                    task["created_at"].replace("Z", "+00:00"))
+                    task["created_at"].replace("Z", "+00:00")
+                )
 
             if task["deadline"] and isinstance(task["deadline"], str):
                 task["deadline"] = datetime.fromisoformat(task["deadline"]).date()
@@ -150,43 +140,50 @@ async def task_detail_page(
 
             creator_response = await client.get(
                 f"http://localhost:8000/users/{task['creator_id']}",
-                cookies=request.cookies
+                cookies=request.cookies,
             )
-            creator = creator_response.json() if creator_response.status_code == 200 else {
-                "email": "Unknown"}
+            creator = (
+                creator_response.json()
+                if creator_response.status_code == 200
+                else {"email": "Unknown"}
+            )
 
             assignee = None
             if task["assignee_id"]:
                 assignee_response = await client.get(
                     f"http://localhost:8000/users/{task['assignee_id']}",
-                    cookies=request.cookies
+                    cookies=request.cookies,
                 )
-                assignee = assignee_response.json() if assignee_response.status_code == 200 else None
+                assignee = (
+                    assignee_response.json()
+                    if assignee_response.status_code == 200
+                    else None
+                )
 
         except Exception as e:
             request.session["messages"] = [f"Ошибка загрузки данных: {str(e)}"]
             return RedirectResponse("/view/tasks", status_code=303)
 
-    return templates.TemplateResponse("tasks/detail.html", {
-        "request": request,
-        "user": user,
-        "task": task,
-        "creator": creator,
-        "assignee": assignee,
-    })
+    return templates.TemplateResponse(
+        "tasks/detail.html",
+        {
+            "request": request,
+            "user": user,
+            "task": task,
+            "creator": creator,
+            "assignee": assignee,
+        },
+    )
 
 
 @router.get("/view/tasks/{task_id}/edit", response_class=HTMLResponse)
 async def edit_task_page(
-    request: Request,
-    task_id: int,
-    user: User = Depends(current_active_user)
+    request: Request, task_id: int, user: User = Depends(current_active_user)
 ):
     async with httpx.AsyncClient() as client:
         try:
             task_response = await client.get(
-                f"http://localhost:8000/tasks/{task_id}",
-                cookies=request.cookies
+                f"http://localhost:8000/tasks/{task_id}", cookies=request.cookies
             )
             if task_response.status_code != 200:
                 request.session["messages"] = ["Задача не найдена."]
@@ -195,21 +192,26 @@ async def edit_task_page(
 
             if isinstance(task["created_at"], str):
                 task["created_at"] = datetime.fromisoformat(
-                    task["created_at"].replace("Z", "+00:00"))
+                    task["created_at"].replace("Z", "+00:00")
+                )
 
             if task["deadline"] and isinstance(task["deadline"], str):
                 task["deadline"] = datetime.fromisoformat(task["deadline"]).date()
 
-            if user.id != task["creator_id"] and user.role not in [RoleEnum.manager, RoleEnum.admin]:
+            if user.id != task["creator_id"] and user.role not in [
+                RoleEnum.manager,
+                RoleEnum.admin,
+            ]:
                 request.session["messages"] = [
-                    "У вас нет прав на редактирование этой задачи."]
+                    "У вас нет прав на редактирование этой задачи."
+                ]
                 return RedirectResponse(f"/view/tasks/{task_id}", status_code=303)
 
             team_members = []
             users_response = await client.get(
                 "http://localhost:8000/users/",
                 params={"skip": 0, "limit": 100},
-                cookies=request.cookies
+                cookies=request.cookies,
             )
             if users_response.status_code == 200:
                 all_users = users_response.json()
@@ -219,12 +221,10 @@ async def edit_task_page(
             request.session["messages"] = [f"Ошибка загрузки данных: {str(e)}"]
             return RedirectResponse("/view/tasks", status_code=303)
 
-    return templates.TemplateResponse("tasks/edit.html", {
-        "request": request,
-        "user": user,
-        "task": task,
-        "team_members": team_members
-    })
+    return templates.TemplateResponse(
+        "tasks/edit.html",
+        {"request": request, "user": user, "task": task, "team_members": team_members},
+    )
 
 
 @router.post("/view/tasks/{task_id}/edit", response_class=RedirectResponse)
@@ -236,20 +236,22 @@ async def update_task_form(
     status: str = Form(None),
     deadline: date = Form(None),
     assignee_id: int = Form(None),
-    user: User = Depends(current_active_user)
+    user: User = Depends(current_active_user),
 ):
     async with httpx.AsyncClient() as client:
         try:
             task_response = await client.get(
-                f"http://localhost:8000/tasks/{task_id}",
-                cookies=request.cookies
+                f"http://localhost:8000/tasks/{task_id}", cookies=request.cookies
             )
             if task_response.status_code != 200:
                 request.session["messages"] = ["Задача не найдена."]
                 return RedirectResponse("/view/tasks", status_code=303)
             task = task_response.json()
 
-            if user.id != task["creator_id"] and user.role not in [RoleEnum.manager, RoleEnum.admin]:
+            if user.id != task["creator_id"] and user.role not in [
+                RoleEnum.manager,
+                RoleEnum.admin,
+            ]:
                 request.session["messages"] = ["Нет прав на редактирование."]
                 return RedirectResponse(f"/view/tasks/{task_id}", status_code=303)
 
@@ -268,7 +270,7 @@ async def update_task_form(
             response = await client.patch(
                 f"http://localhost:8000/tasks/{task_id}",
                 json=update_data,
-                cookies=request.cookies
+                cookies=request.cookies,
             )
 
             if response.status_code == 200:

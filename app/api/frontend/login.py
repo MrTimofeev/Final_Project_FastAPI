@@ -17,6 +17,7 @@ templates = Jinja2Templates(directory="app/templates")
 async def login_page(request: Request):
     return templates.TemplateResponse("auth/login.html", {"request": request})
 
+
 @router.post("/login", response_class=RedirectResponse)
 async def login_form(
     request: Request,
@@ -29,7 +30,6 @@ async def login_form(
         user = await user_manager.get_by_email(email)
     except Exception:
         user = None
-
 
     if not user:
         request.session["messages"] = ["Неверный email или пароль."]
@@ -45,7 +45,6 @@ async def login_form(
 
     token = await strategy.write_token(user)
 
-
     response = RedirectResponse("/", status_code=303)
     response.set_cookie(
         key="auth",
@@ -56,5 +55,3 @@ async def login_form(
         max_age=3600 * 24 * 7,
     )
     return response
-
-

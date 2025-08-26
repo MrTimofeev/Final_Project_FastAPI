@@ -10,16 +10,14 @@ router = APIRouter(tags=["frontend"])
 
 templates = Jinja2Templates(directory="app/templates")
 
+
 @router.get("/profile", response_class=HTMLResponse)
-async def profile_page(
-    request: Request,
-    user: User = Depends(current_active_user)
-):
-    return templates.TemplateResponse("users/profile.html", {
-        "request": request,
-        "user": user
-    })
-    
+async def profile_page(request: Request, user: User = Depends(current_active_user)):
+    return templates.TemplateResponse(
+        "users/profile.html", {"request": request, "user": user}
+    )
+
+
 @router.post("/profile/delete", response_class=RedirectResponse)
 async def delete_profile(
     request: Request,
@@ -31,8 +29,7 @@ async def delete_profile(
     async with httpx.AsyncClient() as client:
         try:
             response = await client.delete(
-                f"http://localhost:8000/users/{user.id}",
-                cookies=request.cookies
+                f"http://localhost:8000/users/{user.id}", cookies=request.cookies
             )
             if response.status_code == 204:
                 request.session["messages"] = ["Ваш аккаунт успешно удалён."]

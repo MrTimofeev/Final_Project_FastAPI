@@ -37,7 +37,7 @@ async def create_evaluation(
         raise HTTPException(
             status_code=404, detail="Задача не найдена или вы не в команде"
         )
-    
+
     if task.status != TaskStatus.done:
         raise HTTPException(
             status_code=400, detail="Оценивать можно только выполненые задачи"

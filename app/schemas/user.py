@@ -20,7 +20,6 @@ class UserRead(schemas.BaseUser[int]):
     team_id: Optional[int] = None
     is_active: bool = True
     is_superuser: bool = False
-    
 
     model_config = ConfigDict(from_attributes=True)
 

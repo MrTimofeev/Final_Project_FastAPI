@@ -112,7 +112,9 @@ auth_backend_cookie = AuthenticationBackend(
 )
 
 # Основной экземпляр fastapi-users
-fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend, auth_backend_cookie])
+fastapi_users = FastAPIUsers[User, int](
+    get_user_manager, [auth_backend, auth_backend_cookie]
+)
 
 # Зависимости для получения текущего пользователя
 current_active_user = fastapi_users.current_user(active=True)

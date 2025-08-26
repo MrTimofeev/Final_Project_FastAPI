@@ -9,11 +9,21 @@ from typing import AsyncGenerator
 from decouple import config
 
 from app.database.database import engine
-from app.api import auth, frontend_routes, users, teams, tasks, meetings, evaluations, calendar
+from app.api import (
+    auth,
+    frontend_routes,
+    users,
+    teams,
+    tasks,
+    meetings,
+    evaluations,
+    calendar,
+)
 
 SECRET = config("SECRET_KEY")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(config("ACCESS_TOKEN_EXPIRE_MINUTES", 60))
 DEBUG = config("DEBUG")
+
 
 # Жизненный цикл приложения
 @asynccontextmanager
@@ -72,7 +82,7 @@ app.include_router(tasks.router)
 app.include_router(meetings.router)
 app.include_router(evaluations.router)
 app.include_router(calendar.router)
-app.include_router(frontend_routes.router) 
+app.include_router(frontend_routes.router)
 
 
 setup_admin(app)

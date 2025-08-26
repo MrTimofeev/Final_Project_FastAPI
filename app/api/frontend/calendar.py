@@ -12,12 +12,13 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 @router.get("/calendar/view/day", response_class=HTMLResponse)
-async def calendar_day_page(request: Request, user: User = Depends(current_active_user)):
+async def calendar_day_page(
+    request: Request, user: User = Depends(current_active_user)
+):
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
-                "http://localhost:8000/calendar/day",
-                cookies=request.cookies
+                "http://localhost:8000/calendar/day", cookies=request.cookies
             )
             if response.status_code == 200:
                 data = response.json()
@@ -29,13 +30,15 @@ async def calendar_day_page(request: Request, user: User = Depends(current_activ
             data = {"date": "—", "tasks": [], "meetings": []}
             request.session["messages"] = ["Ошибка подключения."]
 
-    return templates.TemplateResponse("calendar/day.html", {
-        "request": request,
-        "user": user,
-        "data": data
-    })
+    return templates.TemplateResponse(
+        "calendar/day.html", {"request": request, "user": user, "data": data}
+    )
 
 
 @router.get("/calendar/view/month", response_class=HTMLResponse)
-async def calendar_month_page(request: Request, user: User = Depends(current_active_user)):
-    return templates.TemplateResponse("calendar/month.html", {"request": request, "user": user})
+async def calendar_month_page(
+    request: Request, user: User = Depends(current_active_user)
+):
+    return templates.TemplateResponse(
+        "calendar/month.html", {"request": request, "user": user}
+    )

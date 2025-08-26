@@ -11,13 +11,13 @@ router = APIRouter(tags=["frontend"])
 
 templates = Jinja2Templates(directory="app/templates")
 
+
 @router.get("/view/meetings", response_class=HTMLResponse)
 async def meetings_page(request: Request, user: User = Depends(current_active_user)):
     async with httpx.AsyncClient() as client:
         try:
             response = await client.get(
-                "http://localhost:8000/meetings/",
-                cookies=request.cookies
+                "http://localhost:8000/meetings/", cookies=request.cookies
             )
             if response.status_code == 200:
                 meetings = response.json()
@@ -28,21 +28,19 @@ async def meetings_page(request: Request, user: User = Depends(current_active_us
             meetings = []
             request.session["messages"] = ["Сервер встреч недоступен."]
 
-    return templates.TemplateResponse("meetings/list.html", {
-        "request": request,
-        "user": user,
-        "meetings": meetings
-    })
-
+    return templates.TemplateResponse(
+        "meetings/list.html", {"request": request, "user": user, "meetings": meetings}
+    )
 
 
 @router.get("/view/meetings/create", response_class=HTMLResponse)
 async def create_meeting_page(
-    request: Request,
-    user: User = Depends(current_active_user)
+    request: Request, user: User = Depends(current_active_user)
 ):
     if user.role not in [RoleEnum.manager, RoleEnum.admin]:
-        request.session["messages"] = ["Только менеджеры и администраторы могут назначать встречи."]
+        request.session["messages"] = [
+            "Только менеджеры и администраторы могут назначать встречи."
+        ]
         return RedirectResponse("/view/meetings", status_code=303)
 
     if not user.team_id:
@@ -55,7 +53,7 @@ async def create_meeting_page(
             response = await client.get(
                 f"http://localhost:8000/users/",
                 params={"skip": 0, "limit": 100},
-                cookies=request.cookies
+                cookies=request.cookies,
             )
             if response.status_code == 200:
                 all_users = response.json()
@@ -63,11 +61,10 @@ async def create_meeting_page(
         except Exception:
             request.session["messages"] = ["Не удалось загрузить участников команды."]
 
-    return templates.TemplateResponse("meetings/create.html", {
-        "request": request,
-        "user": user,
-        "team_members": team_members
-    })
+    return templates.TemplateResponse(
+        "meetings/create.html",
+        {"request": request, "user": user, "team_members": team_members},
+    )
 
 
 @router.post("/view/meetings/create", response_class=RedirectResponse)
@@ -78,7 +75,7 @@ async def create_meeting_form(
     start_time: datetime = Form(...),
     end_time: datetime = Form(...),
     participant_ids: list[int] = Form(...),
-    user: User = Depends(current_active_user)
+    user: User = Depends(current_active_user),
 ):
     if user.role not in [RoleEnum.manager, RoleEnum.admin]:
         raise HTTPException(status_code=403, detail="Доступ запрещён")
@@ -88,7 +85,9 @@ async def create_meeting_form(
         return RedirectResponse("/view/teams/join", status_code=303)
 
     if start_time >= end_time:
-        request.session["messages"] = ["Время начала должно быть раньше времени окончания."]
+        request.session["messages"] = [
+            "Время начала должно быть раньше времени окончания."
+        ]
         return RedirectResponse("/view/meetings/create", status_code=303)
 
     meeting_data = {
@@ -96,7 +95,7 @@ async def create_meeting_form(
         "description": description,
         "start_time": start_time.isoformat(),
         "end_time": end_time.isoformat(),
-        "participant_ids": participant_ids
+        "participant_ids": participant_ids,
     }
 
     async with httpx.AsyncClient() as client:
@@ -104,7 +103,7 @@ async def create_meeting_form(
             response = await client.post(
                 "http://localhost:8000/meetings/",
                 json=meeting_data,
-                cookies=request.cookies
+                cookies=request.cookies,
             )
             if response.status_code == 201:
                 request.session["messages"] = ["Встреча успешно назначена!"]

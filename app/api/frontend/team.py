@@ -16,7 +16,9 @@ async def join_team_page(request: Request, user: User = Depends(current_active_u
     if user.team_id:
         request.session["messages"] = ["Вы уже состоите в команде."]
         return RedirectResponse("/", status_code=303)
-    return templates.TemplateResponse("teams/join.html", {"request": request, "user": user})
+    return templates.TemplateResponse(
+        "teams/join.html", {"request": request, "user": user}
+    )
 
 
 @router.post("/view/teams/join", response_class=RedirectResponse)
@@ -34,7 +36,7 @@ async def join_team_form(
             response = await client.post(
                 "http://localhost:8000/team/join",
                 params={"team_code": team_code},
-                cookies=request.cookies
+                cookies=request.cookies,
             )
             if response.status_code == 200:
                 request.session["messages"] = ["Вы успешно присоединились к команде!"]
@@ -49,22 +51,20 @@ async def join_team_form(
 
 
 @router.get("/view/teams/create", response_class=HTMLResponse)
-async def create_team_page(
-    request: Request,
-    user: User = Depends(current_active_user)
-):
+async def create_team_page(request: Request, user: User = Depends(current_active_user)):
     if user.role != RoleEnum.admin:
         request.session["messages"] = [
-            "Доступ запрещён. Только администраторы могут создавать команды."]
+            "Доступ запрещён. Только администраторы могут создавать команды."
+        ]
         return RedirectResponse("/", status_code=303)
-    return templates.TemplateResponse("teams/create.html", {"request": request, "user": user})
+    return templates.TemplateResponse(
+        "teams/create.html", {"request": request, "user": user}
+    )
 
 
 @router.post("/view/teams/create", response_class=RedirectResponse)
 async def create_team_form(
-    request: Request,
-    name: str = Form(...),
-    user: User = Depends(current_active_user)
+    request: Request, name: str = Form(...), user: User = Depends(current_active_user)
 ):
     if user.role != RoleEnum.admin:
         raise HTTPException(status_code=403, detail="Доступ запрещён")
@@ -74,12 +74,13 @@ async def create_team_form(
             response = await client.post(
                 "http://localhost:8000/team/",
                 json={"name": name},
-                cookies=request.cookies
+                cookies=request.cookies,
             )
             if response.status_code == 201:
                 data = response.json()
                 request.session["messages"] = [
-                    f"Команда '{data['name']}' создана! Код: {data['team_code']}"]
+                    f"Команда '{data['name']}' создана! Код: {data['team_code']}"
+                ]
                 return RedirectResponse("/", status_code=303)
             else:
                 error = response.json().get("detail", "Неизвестная ошибка")
