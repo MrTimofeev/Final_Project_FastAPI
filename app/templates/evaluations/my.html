@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Мои оценки{% endblock %}
+
+{% block content %}
+<h2>Мои оценённые задачи</h2>
+
+{% if evaluations %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID задачи</th>
+                <th>Название</th>
+                <th>Оценка</th>
+                <th>Дата оценки</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ev in evaluations %}
+            <tr>
+                <td>{{ ev.task_id }}</td>
+                <td>{{ ev.task_title }}</td>
+                <td>
+                    {% for i in range(1, 6) %}
+                        {% if i <= ev.score %}
+                            <span style="color: gold;">★</span>
+                        {% else %}
+                            <span style="color: #ccc;">★</span>
+                        {% endif %}
+                    {% endfor %}
+                    ({{ ev.score }})
+                </td>
+                <td>{{ ev.evaluated_at }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>Вы пока не оценили ни одной задачи.</p>
+{% endif %}
+
+<a href="/" class="btn btn-secondary">На главную</a>
+{% endblock %}

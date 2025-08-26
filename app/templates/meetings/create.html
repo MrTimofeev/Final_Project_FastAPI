@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Назначить встречу{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Назначить встречу</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">Название</label>
+                <input type="text" class="form-control" id="title" name="title" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание</label>
+                <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+            </div>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="start_time" class="form-label">Время начала</label>
+                    <input type="datetime-local" class="form-control" id="start_time" name="start_time" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="end_time" class="form-label">Время окончания</label>
+                    <input type="datetime-local" class="form-control" id="end_time" name="end_time" required>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="participant_ids" class="form-label">Участники</label>
+                <select multiple class="form-select" id="participant_ids" name="participant_ids" required>
+                    {% for user in team_members %}
+                        <option value="{{ user.id }}">{{ user.full_name or user.email }}</option>
+                    {% endfor %}
+                </select>
+                <small class="text-muted">Удерживайте Ctrl (или Cmd), чтобы выбрать несколько.</small>
+            </div>
+            <button type="submit" class="btn btn-success">Назначить встречу</button>
+            <a href="/meetings" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

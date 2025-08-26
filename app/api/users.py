@@ -17,7 +17,6 @@ async def created_user(user: UserCreate, db: AsyncSession = Depends(get_db)):
     Создание пользователя
     """
 
-    # Проверка: email уже существует
     result = await db.execute(select(User).where(User.email == user.email))
     if result.scalar().first():
         raise HTTPException(
@@ -47,7 +46,7 @@ async def get_users(
     Получение списка пользователей с пагинацией
     """
     result = await db.execute(select(User).offset(skip).limit(limit))
-    users = result.scalar().all()
+    users = result.scalars().all()
     return users
 
 
@@ -103,5 +102,5 @@ async def delete_user(user_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Пользователь не найден")
 
     await db.delete(user)
-    await db.commit
+    await db.commit()
     return

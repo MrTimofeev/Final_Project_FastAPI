@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Оценить задачу{% endblock %}
+
+{% block content %}
+<h2>Оценить задачу</h2>
+<form method="post">
+    <div class="mb-3">
+        <label>Task ID</label>
+        <input type="number" name="task_id" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Оценка (1–5)</label>
+        <select name="score" class="form-control" required>
+            <option value="">Выберите</option>
+            <option value="1">1 — Плохо</option>
+            <option value="2">2 — Ниже среднего</option>
+            <option value="3">3 — Средне</option>
+            <option value="4">4 — Хорошо</option>
+            <option value="5">5 — Отлично</option>
+        </select>
+    </div>
+    <button type="submit" class="btn btn-success">Оценить</button>
+</form>
+<a href="/view/tasks">К задачам</a>
+{% endblock %}

@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 from app.database.database import get_db
 from app.models.user import User
-from app.models.task import Task
+from app.models.task import Task, TaskStatus
 from app.models.evaluation import Evaluation
 from app.schemas.evaluation import EvaluationCreate, EvaluationOut
 from app.core.security import manager_required, get_current_user
@@ -24,11 +24,9 @@ async def create_evaluation(
     Задача должна быть в статусе 'done'.
     Оценка от 1 до 5.
     """
-    # Провека: оценка 1 до 5
     if not (1 <= evaluation_data.score <= 5):
         raise HTTPException(status_code=400, detail="Оценка должны быть от 1 до 5")
 
-    # Проверка: задача существует и в команде пользователя
     result = await db.execute(
         select(Task).where(
             Task.id == evaluation_data.task_id, Task.team_id == current_user.team_id
@@ -39,13 +37,12 @@ async def create_evaluation(
         raise HTTPException(
             status_code=404, detail="Задача не найдена или вы не в команде"
         )
-
-    if task.status.value != "done":
+    
+    if task.status != TaskStatus.done:
         raise HTTPException(
             status_code=400, detail="Оценивать можно только выполненые задачи"
         )
 
-    # Проверка: уже оценена?
     result = await db.execute(
         select(Evaluation).where(Evaluation.task_id == evaluation_data.task_id)
     )
@@ -76,7 +73,7 @@ async def get_my_evaluations(
     result = await db.execute(
         select(Evaluation).join(Task).where(Task.assignee_id == current_user.id)
     )
-    evaluations = result.scalar().all()
+    evaluations = result.scalars().all()
     return evaluations
 
 

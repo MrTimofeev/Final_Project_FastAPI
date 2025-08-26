@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Календарь (день){% endblock %}
+
+{% block content %}
+<h2>Календарь на {{ data.date }}</h2>
+<h4>Задачи</h4>
+<ul>
+    {% for task in data.tasks %}
+    <li>{{ task.title }} ({{ task.status }})</li>
+    {% endfor %}
+</ul>
+
+<h4>Встречи</h4>
+<ul>
+    {% for meeting in data.meetings %}
+    <li>{{ meeting.title }} — {{ meeting.time }}</li>
+    {% endfor %}
+</ul>
+
+<a href="/" class="btn btn-secondary">На главную</a>
+{% endblock %}

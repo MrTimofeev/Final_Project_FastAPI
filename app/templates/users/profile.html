@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Профиль{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3>Профиль пользователя</h3>
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item">
+                        <strong>Email:</strong> {{ user.email }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>ФИО:</strong> {{ user.full_name or "— не указано" }}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Роль:</strong>
+                        {% if user.role.value == "admin" %}
+                            <span class="badge bg-danger">{{ user.role.value | upper }}</span>
+                        {% elif user.role.value == "manager" %}
+                            <span class="badge bg-warning text-dark">{{ user.role.value | upper }}</span>
+                        {% else %}
+                            <span class="badge bg-secondary">{{ user.role.value | upper }}</span>
+                        {% endif %}
+                    </li>
+                    <li class="list-group-item">
+                        <strong>Команда:</strong>
+                        {% if user.team_id %}
+                            ID {{ user.team_id }}
+                        {% else %}
+                            <span class="text-muted">Не состоит в команде</span>
+                        {% endif %}
+                    </li>
+                </ul>
+
+                <div class="mt-4">
+                    <a href="/view/tasks" class="btn btn-outline-primary">Мои задачи</a>
+                    {% if user.role.value == "manager" %}
+                        <a href="/view/evaluations/create" class="btn btn-outline-success">Оценить задачу</a>
+                    {% endif %}
+                    <a href="/view/teams/join" class="btn btn-outline-info">Присоединиться к команде</a>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mt-4 p-3 bg-light border rounded">
+    <h5>Удаление аккаунта</h5>
+    <p class="text-danger">Это действие нельзя отменить. Все данные будут безвозвратно потеряны.</p>
+    <form method="post" action="/profile/delete" onsubmit="return confirm('Вы уверены, что хотите удалить аккаунт? Это действие нельзя отменить.')">
+        <button type="submit" class="btn btn-danger btn-sm">Удалить мой аккаунт</button>
+    </form>
+</div>
+{% endblock %}

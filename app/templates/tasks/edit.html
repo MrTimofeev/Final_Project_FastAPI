@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Редактировать задачу{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2>Редактировать задачу</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label for="title" class="form-label">Название</label>
+                <input type="text" class="form-control" id="title" name="title" value="{{ task.title }}" required>
+            </div>
+            <div class="mb-3">
+                <label for="description" class="form-label">Описание</label>
+                <textarea class="form-control" id="description" name="description" rows="4">{{ task.description }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label for="status" class="form-label">Статус</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="open" {% if task.status == "open" %}selected{% endif %}>open</option>
+                    <option value="in_progress" {% if task.status == "in_progress" %}selected{% endif %}>in_progress</option>
+                    <option value="done" {% if task.status == "done" %}selected{% endif %}>done</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="deadline" class="form-label">Дедлайн</label>
+                <input type="date" class="form-control" id="deadline" name="deadline"
+                       value="{% if task.deadline %}{{ task.deadline.strftime('%Y-%m-%d') }}{% endif %}">
+            </div>
+            <div class="mb-3">
+                <label for="assignee_id" class="form-label">Исполнитель</label>
+                <select class="form-select" id="assignee_id" name="assignee_id">
+                    <option value="">— не назначен —</option>
+                    {% for user in team_members %}
+                        <option value="{{ user.id }}" {% if user.id == task.assignee_id %}selected{% endif %}>
+                            {{ user.full_name or user.email }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            <a href="/view/tasks/{{ task.id }}" class="btn btn-secondary">Отмена</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

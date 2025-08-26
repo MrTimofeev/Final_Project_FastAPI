@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Встречи{% endblock %}
+
+{% block content %}
+<h2>Ваши встречи</h2>
+{% if meetings %}
+    <ul class="list-group">
+        {% for meeting in meetings %}
+        <li class="list-group-item">
+            <h5>{{ meeting.title }}</h5>
+            <p>{{ meeting.description }}</p>
+            <p><strong>Время:</strong> {{ meeting.start_time }} — {{ meeting.end_time }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>Нет предстоящих встреч.</p>
+{% endif %}
+<a href="/" class="btn btn-secondary">На главную</a>
+{% endblock %}

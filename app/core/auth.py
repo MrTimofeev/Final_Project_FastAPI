@@ -3,6 +3,7 @@ from fastapi_users import FastAPIUsers
 from fastapi_users.authentication import (
     JWTStrategy,
     BearerTransport,
+    CookieTransport,
     AuthenticationBackend,
 )
 from fastapi_users.db import SQLAlchemyUserDatabase
@@ -80,6 +81,11 @@ def get_jwt_strategy() -> JWTStrategy:
     return strategy
 
 
+# Зависимость для получения cookie-стратегии
+def get_cookie_strategy() -> JWTStrategy:
+    return get_jwt_strategy()
+
+
 # Аутентификационный бэкенд
 auth_backend = AuthenticationBackend(
     name="jwt",
@@ -87,8 +93,26 @@ auth_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
+# Для API: возвращает токен в JSON
+bearer_transport = BearerTransport(tokenUrl="/auth/jwt/login")
+
+# Для веба: устанавливает куку
+cookie_transport = CookieTransport(
+    cookie_name="auth",
+    cookie_secure=False,  # True в продакшене с HTTPS
+    cookie_httponly=True,
+    cookie_samesite="lax",
+)
+
+# Для веба (устанавливаем куку)
+auth_backend_cookie = AuthenticationBackend(
+    name="cookie",
+    transport=cookie_transport,
+    get_strategy=get_jwt_strategy,
+)
+
 # Основной экземпляр fastapi-users
-fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend])
+fastapi_users = FastAPIUsers[User, int](get_user_manager, [auth_backend, auth_backend_cookie])
 
 # Зависимости для получения текущего пользователя
 current_active_user = fastapi_users.current_user(active=True)

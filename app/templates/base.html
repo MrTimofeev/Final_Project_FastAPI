@@ -1,31 +1,62 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Система управления бизнесом</title>
+    <meta charset="UTF-8" />
+    <title>{% block title %}TeamFlow{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
 </head>
+
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="/">Business Management</a>
+            <a class="navbar-brand" href="/">TeamFlow</a>
             <div class="navbar-nav ms-auto">
-                {% if current_user %}
-                    <span class="navbar-text me-3">Привет, {{ current_user.full_name or current_user.email }}</span>
-                    <a class="nav-link" href="/dashboard">Личный кабинет</a>
-                    <a class="nav-link" href="/logout">Выход</a>
+                {% if user %}
+                <span class="navbar-text me-3">Привет, {{ user.full_name or user.email }}</span>
+                <a class="nav-link" href="/view/tasks">Задачи</a>
+                <a class="nav-link" href="/calendar/view/day">Календарь</a>
+                <a class="nav-link" href="/view/meetings">Встречи</a>
+                {% if user.role.value == "manager" or user.role.value == "admin" %}
+                <a class="nav-link" href="/view/meetings/create">Назначить встречу</a>
+                {% endif %}
+                <a class="nav-link" href="/view/evaluations/my">Оценки</a>
+                {% if user.role.value == "manager" %}
+                <a class="nav-link" href="/view/teams/join">Присоединиться к команде</a>
+                {% endif %}
+
+                {% if user.role.value == "admin" %}
+                <a class="nav-link" href="/view/teams/join">Мои команды</a>
+                <a class="nav-link" href="/view/teams/create">Создать команду</a>
+                {% endif %}
+                <a class="nav-link" href="/profile">Профиль</a>
+                <a class="nav-link" href="/logout">Выход</a>
                 {% else %}
-                    <a class="nav-link" href="/login">Вход</a>
-                    <a class="nav-link" href="/register">Регистрация</a>
+                <a class="nav-link" href="/login">Вход</a>
+                <a class="nav-link" href="/register">Регистрация</a>
                 {% endif %}
             </div>
         </div>
     </nav>
 
     <div class="container mt-4">
+        {% with messages = request.session.get('messages') %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% set _ = request.session.pop('messages') %}
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

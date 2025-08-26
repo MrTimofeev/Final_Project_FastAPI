@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Задача #{{ task.id }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <h2>{{ task.title }}</h2>
+        <p class="text-muted">{{ task.description or "Описание отсутствует" }}</p>
+
+        <div class="card mb-4">
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><strong>ID:</strong> {{ task.id }}</li>
+                    <li><strong>Статус:</strong>
+                        {% if task.status == "open" %}
+                        <span class="badge bg-secondary">{{ task.status }}</span>
+                        {% elif task.status == "in_progress" %}
+                        <span class="badge bg-warning text-dark">{{ task.status }}</span>
+                        {% else %}
+                        <span class="badge bg-success">{{ task.status }}</span>
+                        {% endif %}
+                    </li>
+                    <li><strong>Создатель:</strong> {{ creator.full_name or creator.email }}</li>
+                    <li><strong>Исполнитель:</strong>
+                        {% if assignee %}
+                        {{ assignee.full_name or assignee.email }}
+                        {% else %}
+                        <em>Не назначен</em>
+                        {% endif %}
+                    </li>
+                    <li><strong>Дедлайн:</strong>
+                        {% if task.deadline %}
+                        {{ task.deadline.strftime("%d.%m.%Y") }}
+                        {% else %}
+                        <em>Не установлен</em>
+                        {% endif %}
+                    </li>
+                    <li><strong>Дата создания:</strong> {{ task.created_at.strftime("%d.%m.%Y %H:%M") }}</li>
+                </ul>
+            </div>
+        </div>
+
+        {% if task.status == "done" and user.role.value == "manager" %}
+        <div class="mb-4">
+            <a href="/view/evaluations/create?task_id={{ task.id }}" class="btn btn-success">Оценить задачу</a>
+        </div>
+        {% endif %}
+
+        <div class="btn-group" role="group">
+            <a href="/view/tasks" class="btn btn-secondary">Назад к задачам</a>
+            {% if user.id == task.assignee_id and task.status == "open" %}
+            <a href="/view/tasks/{{ task.id }}/start" class="btn btn-warning">Начать выполнение</a>
+            {% elif user.id == task.assignee_id and task.status == "in_progress" %}
+            <a href="/view/tasks/{{ task.id }}/complete" class="btn btn-success">Завершить</a>
+            {% endif %}
+            {% if user.id == task.creator_id or user.role.value in ["manager", "admin"] %}
+            <a href="/view/tasks/{{ task.id }}/edit" class="btn btn-outline-primary">Редактировать</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

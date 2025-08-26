@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Главная{% endblock %}
+
+{% block content %}
+<div class="p-5 bg-light rounded">
+    <h1>Добро пожаловать, {{ user.full_name or user.email }}!</h1>
+    <p>Вы в системе управления командами TeamFlow.</p>
+    <p><strong>Роль:</strong> {{ user.role.value }}</p>
+    <p><strong>Команда:</strong> {% if user.team_id %}ID {{ user.team_id }}{% else %}Нет{% endif %}</p>
+
+    <div class="mt-4">
+        <a href="/view/tasks" class="btn btn-primary">Мои задачи</a>
+        <a href="/calendar/view/day" class="btn btn-outline-secondary">Календарь</a>
+        <a href="/view/meetings" class="btn btn-outline-secondary">Встречи</a>
+    </div>
+</div>
+{% endblock %}
