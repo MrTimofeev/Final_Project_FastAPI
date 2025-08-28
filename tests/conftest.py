@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from app.main import app as fastapi_app
 from fastapi import FastAPI
 from app.database.database import Base, get_db, engine
-from app.models.user import User
+from app.models.user import User, RoleEnum
 from app.models.comment import Comment
 from app.models.team import Team
 from app.models.task import Task
@@ -63,7 +63,7 @@ async def admin_user(db_session: AsyncSession):
         email="admin@example.com",
         hashed_password=get_password_hash("password123"),
         full_name="Admin",
-        role="admin",
+        role=RoleEnum.admin,
         is_active=True,
         is_superuser=False,
     )
@@ -80,7 +80,7 @@ async def manager_user(db_session: AsyncSession):
         email="manager@example.com",
         hashed_password=get_password_hash("password123"),
         full_name="Manager",
-        role="manager",
+        role=RoleEnum.manager,
         is_active=True,
         team_id=None,
     )
@@ -97,7 +97,7 @@ async def regular_user(db_session: AsyncSession):
         email="user@example.com",
         hashed_password=get_password_hash("password123"),
         full_name="User",
-        role="user",
+        role=RoleEnum.user,
         is_active=True,
         team_id=None,
     )

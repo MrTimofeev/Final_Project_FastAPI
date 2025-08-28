@@ -4,7 +4,7 @@ from sqlalchemy import select
 
 from app.database.database import get_db
 from app.models.task import Task, TaskStatus
-from app.models.user import User
+from app.models.user import User, RoleEnum
 from app.schemas.task import TaskCreate, TaskUpdate, TaskOut
 from app.core.security import manager_required, get_current_user
 
@@ -102,8 +102,8 @@ async def update_task(
 
     # Проверка: автор или менеджер
     if current_user.id != task.creator_id and not current_user.role in [
-        "manager",
-        "admin",
+        RoleEnum.manager,
+        RoleEnum.admin,
     ]:
         raise HTTPException(status_code=403, detail="Нет прав на редактивроение")
 
@@ -129,7 +129,7 @@ async def delete_task(
     if not task:
         raise HTTPException(status_code=404, detail="Задача не найдена")
 
-    if current_user.id != task.creator_id and current_user.role != "manager":
+    if current_user.id != task.creator_id and current_user.role != RoleEnum.manager:
         raise HTTPException(status_code=403, detail="Нет прав на удаление")
 
     await db.delete(task)
