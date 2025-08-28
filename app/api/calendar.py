@@ -71,7 +71,7 @@ async def get_calendar_day(
 @router.get("/month")
 async def get_calendar_month(
     target_month: int = None,
-    target_years: int = None,
+    target_year: int = None,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
@@ -81,7 +81,7 @@ async def get_calendar_month(
 
     now = datetime.now()
     month = target_month or now.month
-    year = target_years or now.year
+    year = target_year or now.year
 
     start = datetime(year, month, 1)
     if month == 12:
