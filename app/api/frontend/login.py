@@ -44,7 +44,9 @@ async def login_form(
         return RedirectResponse("/login", status_code=303)
 
     token = await strategy.write_token(user)
-
+    
+    request.session.update({"user_id": user.id})
+    
     response = RedirectResponse("/", status_code=303)
     response.set_cookie(
         key="auth",

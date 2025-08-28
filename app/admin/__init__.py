@@ -1,5 +1,7 @@
 from sqladmin import Admin, ModelView
 from fastapi import FastAPI
+from decouple import config
+from app.admin.auth import AdminAuth
 from app.database.database import engine
 from app.models.user import User
 from app.models.team import Team
@@ -8,7 +10,11 @@ from app.models.meeting import Meeting
 from app.models.evaluation import Evaluation
 
 
+SECRET = config("SECRET_KEY")
+
 # Админ-панель
+
+
 class UserAdmin(ModelView, model=User):
     column_list = ["id", "email", "full_name", "role", "is_active", "team"]
     column_searchable_list = ["email", "full_name"]
@@ -67,7 +73,12 @@ class EvaluationAdmin(ModelView, model=Evaluation):
 
 # Функция для подключения админки к FastAPI
 def setup_admin(app: FastAPI):
-    admin = Admin(app, engine)
+    authentication_backend = AdminAuth(secret_key=SECRET)
+    admin = Admin(
+        app,
+        engine,
+        authentication_backend=authentication_backend
+    )
 
     admin.add_view(UserAdmin)
     admin.add_view(TeamAdmin)

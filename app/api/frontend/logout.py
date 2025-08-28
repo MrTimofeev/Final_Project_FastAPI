@@ -16,7 +16,7 @@ async def logout_route(
     strategy: Strategy = Depends(auth_backend_cookie.get_strategy),
 ):
     response = RedirectResponse("/login", status_code=303)
-
+    request.session.clear()
     response.delete_cookie(
         key="auth",
         path="/",

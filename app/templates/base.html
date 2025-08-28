@@ -15,6 +15,9 @@
             <div class="navbar-nav ms-auto">
                 {% if user %}
                 <span class="navbar-text me-3">Привет, {{ user.full_name or user.email }}</span>
+                {% if user.role.value == "admin" %}
+                <a class="nav-link" href="/admin">Админка</a>
+                {% endif %}
                 <a class="nav-link" href="/view/tasks">Задачи</a>
                 <a class="nav-link" href="/calendar/view/day">Календарь</a>
                 <a class="nav-link" href="/view/meetings">Встречи</a>
