@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, and_
+from sqlalchemy import select, func
 from typing import List
 
 from app.database.database import get_db
-from app.models.user import User
+from app.models.user import User, RoleEnum
 from app.models.meeting import Meeting
 from app.models.meeting_participant import MeetingParticipant
 from app.schemas.meeting import MeetingCreate, MeetingOut
@@ -35,7 +35,7 @@ async def create_meeting(
 
     if len(participants) != len(meeting_data.participant_ids):
         raise HTTPException(
-            status_code=400, detail="Один или несколько учатников не найдены"
+            status_code=400, detail="Один или несколько участников не найдены"
         )
 
     for p in participants:
@@ -44,6 +44,19 @@ async def create_meeting(
                 status_code=400, detail="Все участники должны быть в одной команде"
             )
 
+    if meeting_data.start_time >= meeting_data.end_time:
+        raise HTTPException(
+            status_code=400,
+            detail="Время начала должно быть раньше времени окончания"
+        )
+    
+    # Проверяем, что start_time и end_time в один и тот же день
+    if meeting_data.start_time.date() != meeting_data.end_time.date():
+        raise HTTPException(
+            status_code=400,
+            detail="Встреча должна начинаться и заканчиваться в один день"
+        )
+    
     # Проверка пересечения времени
     for participant in participants:
         # Ищем все встречи участника в тот же день
@@ -52,13 +65,9 @@ async def create_meeting(
             .join(Meeting.participants)
             .where(
                 MeetingParticipant.user_id == participant.id,
-                Meeting.id != None,  # Все встречи
-                or_(
-                    and_(
-                        Meeting.start_time < meeting_data.end_time,
-                        Meeting.end_time > meeting_data.start_time,
-                    ),
-                ),
+                func.date(Meeting.start_time) == meeting_data.start_time.date(),
+                Meeting.start_time < meeting_data.end_time,
+                Meeting.end_time > meeting_data.start_time,
             )
         )
         overlapping = result.scalars().all()
@@ -69,27 +78,27 @@ async def create_meeting(
                 detail=f"У участника {participant.email} есть пересекающаяся встреча",
             )
 
-        # Создаем встречу
-        meeting = Meeting(
-            title=meeting_data.title,
-            description=meeting_data.description,
-            start_time=meeting_data.start_time,
-            end_time=meeting_data.end_time,
-            team_id=current_user.team_id,
-        )
+    # Создаем встречу
+    meeting = Meeting(
+        title=meeting_data.title,
+        description=meeting_data.description,
+        start_time=meeting_data.start_time,
+        end_time=meeting_data.end_time,
+        team_id=current_user.team_id,
+    )
 
-        db.add(meeting)
-        await db.flush()  # Чтобы получить ID
+    db.add(meeting)
+    await db.flush()  # Чтобы получить ID
 
-        # Добавляем участников
+    # Добавляем участников
 
-        for p in participants:
-            participant_link = MeetingParticipant(meeting_id=meeting.id, user_id=p.id)
-            db.add(participant_link)
+    for p in participants:
+        participant_link = MeetingParticipant(meeting_id=meeting.id, user_id=p.id)
+        db.add(participant_link)
 
-        await db.commit()
-        await db.refresh(meeting)
-        return meeting
+    await db.commit()
+    await db.refresh(meeting)
+    return meeting
 
 
 @router.get("/", response_model=List[MeetingOut])
@@ -126,7 +135,7 @@ async def delete_meting(
         raise HTTPException(status_code=404, detail="Встреча не найдена")
 
     # Проверка прав
-    if meeting.team.creator_id != current_user.id and current_user.role != "admin":
+    if meeting.team.creator_id != current_user.id and current_user.role != RoleEnum.admin:
         raise HTTPException(status_code=403, detail="Нет парв на удаление")
 
     await db.delete(meeting)
