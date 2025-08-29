@@ -1,11 +1,16 @@
 from fastapi import APIRouter, Request, Depends, HTTPException, Form
 from fastapi.responses import HTMLResponse, RedirectResponse
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.templating import Jinja2Templates
 import httpx
 from datetime import date, datetime
 
+from app.database.database import get_db
 from app.core.auth import current_active_user
 from app.models.user import User, RoleEnum
+from app.models.task import Task, TaskStatus
+from app.core.security import get_current_user
 
 router = APIRouter(tags=["frontend"])
 
@@ -125,6 +130,7 @@ async def task_detail_page(
                 request.session["messages"] = ["Задача не найдена."]
                 return RedirectResponse("/view/tasks", status_code=303)
             task = task_response.json()
+            print(task)
 
             if isinstance(task["created_at"], str):
                 task["created_at"] = datetime.fromisoformat(
@@ -142,6 +148,7 @@ async def task_detail_page(
                 f"http://localhost:8000/users/{task['creator_id']}",
                 cookies=request.cookies,
             )
+            print(creator_response)
             creator = (
                 creator_response.json()
                 if creator_response.status_code == 200
@@ -164,6 +171,8 @@ async def task_detail_page(
             request.session["messages"] = [f"Ошибка загрузки данных: {str(e)}"]
             return RedirectResponse("/view/tasks", status_code=303)
 
+    print(creator)
+    print(assignee)
     return templates.TemplateResponse(
         "tasks/detail.html",
         {
@@ -281,5 +290,69 @@ async def update_task_form(
 
         except Exception as e:
             request.session["messages"] = [f"Сервер недоступен: {str(e)}"]
+
+    return RedirectResponse(f"/view/tasks/{task_id}", status_code=303)
+
+
+
+@router.get("/view/tasks/{task_id}/start")
+async def start_task(
+    task_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Пользователь начинает выполнение задачи.
+    Статус меняется на 'in_progress'.
+    Только исполнитель может начать задачу.
+    """
+    result = await db.execute(select(Task).where(Task.id == task_id))
+    task = result.scalars().first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача не найдена")
+
+    # Проверка: пользователь — исполнитель
+    if task.assignee_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Вы не назначены на эту задачу")
+
+    # Проверка: задача должна быть в статусе 'open'
+    if task.status != TaskStatus.open:
+        raise HTTPException(status_code=400, detail="Задача уже в работе или выполнена")
+
+    task.status = TaskStatus.in_progress
+    db.add(task)
+    await db.commit()
+    await db.refresh(task)
+
+    return RedirectResponse(f"/view/tasks/{task_id}", status_code=303)
+
+@router.get("/view/tasks/{task_id}/complete")
+async def complete_task(
+    task_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Пользователь завершает выполнение задачи.
+    Статус меняется на 'done'.
+    Только исполнитель может завершить задачу.
+    """
+    result = await db.execute(select(Task).where(Task.id == task_id))
+    task = result.scalars().first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Задача не найдена")
+
+    # Проверка: пользователь — исполнитель
+    if task.assignee_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Вы не назначены на эту задачу")
+
+    # Проверка: задача должна быть в статусе 'in_progress'
+    if task.status != TaskStatus.in_progress:
+        raise HTTPException(status_code=400, detail="Задача не начата или уже выполнена")
+
+    task.status = TaskStatus.done
+    db.add(task)
+    await db.commit()
+    await db.refresh(task)
 
     return RedirectResponse(f"/view/tasks/{task_id}", status_code=303)
