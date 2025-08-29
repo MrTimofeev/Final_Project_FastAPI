@@ -30,7 +30,14 @@
    docker-compose up --build
    ```
 
-4. Открой:
+4. Создай суперпрользователя для работы с админкой:
+   - Выполни команду:
+   ``` bash
+   docker exec -it bms_web python -m app.cli createsuperuser
+   ```
+   - Введи необходимые данные
+
+5. Открой:
    - API: http://localhost:8000/docs
    - Админ: http://localhost:8000/admin
    - Фронтенд: http://localhost:8000
