@@ -16,7 +16,7 @@ from app.api.frontend import (
     logout,
 )
 
-router = APIRouter(tags=["frontend"])
+router = APIRouter(tags=["frontend"], include_in_schema=False)
 
 templates = Jinja2Templates(directory="app/templates")
 

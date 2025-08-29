@@ -29,7 +29,7 @@ async def delete_profile(
     async with httpx.AsyncClient() as client:
         try:
             response = await client.delete(
-                f"http://localhost:8000/users/{user.id}", cookies=request.cookies
+                f"http://localhost:8000/auth/users/{user.id}", cookies=request.cookies
             )
             if response.status_code == 204:
                 request.session["messages"] = ["Ваш аккаунт успешно удалён."]

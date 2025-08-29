@@ -25,5 +25,5 @@ router.include_router(
 router.include_router(
     fastapi_users.get_users_router(user_schema=UserRead, user_update_schema=UserUpdate),
     prefix="/users",
-    tags=["users"],
+    tags=["auth"],
 )
