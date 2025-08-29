@@ -74,7 +74,6 @@ async def create_evaluation_form(
                 json={"task_id": task_id, "score": score},
                 cookies=request.cookies,
             )
-            print(response.status_code)
             if response.status_code == 201:
                 request.session["messages"] = ["Задача успешно оценена!"]
             else:
